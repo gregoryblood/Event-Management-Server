@@ -9,32 +9,23 @@ const app = express();
 //Tell our app to use tools
 app
   .use(bodyParser.json())
-  .use(express.static(path.resolve(__dirname, '../application/build')))
   .use(cors());
 //This is just for testing (it gets a local file)
-const lodgingData = require('./lodgings.json');
+const eventData = require('./events.json');
 
 app.get('/', function (req, res, next) {
     console.log("== Got a request");
     res.status(200).send("Hello world!");
 });
 
-app.get('/lodgings', function (req, res, next) {
-    console.log("== Got a lodgings request");
+app.get('/events', function (req, res, next) {
+    console.log("== Got a events request");
     res.status(200).send({
-      lodgings: lodgingData
+      events: eventData
     });
 });
 
-app.get('/lodgings/:id', function (req, res, next) {
-    console.log("== req.params:", req.params);
-    const id = req.params.id;
-    if (lodgingData[id]) {
-      res.status(200).send(lodgingData[id]);
-    } else {
-      next();
-    }
-  });
+
 //I think it's called anytime an external middle ware funciton is called
 //I dont know what this does exactly
 app.use(function (req, res, next) {
