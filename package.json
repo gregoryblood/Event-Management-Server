@@ -1,0 +1,29 @@
+{
+  "name": "server-setup",
+  "version": "1.0.0",
+  "description": "Server side aspect of OSU event app",
+  "main": "server.js",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "path": "^0.12.7",
+    "request": "^2.88.2"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "NODE_ENV=development nodemon server.js",
+    "start": "node Server/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gregoryblood/Event-Management-Server.git"
+  },
+  "keywords": [
+    "Node",
+    "Express",
+    "API"
+  ],
+  "author": "Gregory Blood",
+  "homepage": "https://osu-event-app.herokuapp.com/"
+}
