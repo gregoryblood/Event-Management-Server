@@ -14,6 +14,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "NODE_ENV=development nodemon server.js",
     "start": "node Server/index.js"
+    "server": "node Server/index.js"
   },
   "repository": {
     "type": "git",
@@ -25,5 +26,5 @@
     "API"
   ],
   "author": "Gregory Blood",
-  "homepage": "https://osu-event-app.herokuapp.com/"
+  "homepage": "https://osu-event-server.herokuapp.com/"
 }
