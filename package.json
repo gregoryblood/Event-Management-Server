@@ -13,7 +13,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "NODE_ENV=development nodemon server.js",
-    "start": "node Server/index.js"
+    "start": "node Server/index.js",
     "server": "node Server/index.js"
   },
   "repository": {
