@@ -28,8 +28,8 @@ app.get('/events', function (req, res, next) {
 //Create new event
 app.post('/events', function (req, res, next) {
   console.log(req.body);
-  if (req.body && req.body.name && req.body.description && req.body.time
-        && req.body.location && req.body.cur-attendance && req.body.max-attendance && req.body.attendance) {
+  if (req.body && req.body.name && req.body.description
+        && req.body.location) {
     eventData.push(req.body);
     res.status(201).send({
       id: eventData.length - 1
