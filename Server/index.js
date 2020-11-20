@@ -27,7 +27,7 @@ app.get('/events', function (req, res, next) {
 
 //Create new event
 app.post('/events', function (req, res, next) {
-  const str = req.body;
+  
   if (req.body && req.body.name && req.body.description && req.body.location) {
     eventData.push(req.body);
     res.status(201).send({
@@ -35,7 +35,7 @@ app.post('/events', function (req, res, next) {
     });
   } else {
     res.status(400).send({
-      err: str
+      err: "Request doesn't have required fields"
       
     })
   }
