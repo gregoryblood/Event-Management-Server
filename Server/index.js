@@ -27,16 +27,16 @@ app.get('/events', function (req, res, next) {
 
 //Create new event
 app.post('/events', function (req, res, next) {
-  console.log(req.body);
-  if (req.body && req.body.name && req.body.description
-        && req.body.location) {
+  const str = req.body;
+  if (req.body && req.body.name && req.body.description && req.body.location) {
     eventData.push(req.body);
     res.status(201).send({
       id: eventData.length - 1
     });
   } else {
     res.status(400).send({
-      err: "Request doesn't have required fields"
+      err: str
+      
     })
   }
 });
