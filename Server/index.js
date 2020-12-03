@@ -4,6 +4,29 @@ const request = require('request'); // "Request" library
 const cors = require('cors'); //Fixes Core Errors
 const path = require('path'); //Helps find files and stuff
 const  PORT = process.env.PORT || 8888; ///Finds the port the server is being ran on
+
+//Postgres Things - https://devcenter.heroku.com/articles/getting-started-with-nodejs#provision-a-database
+const { Pool } = require('pg');
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
+//Rout to DB
+app.get('/db', async (req, res) => {
+  try {
+    const client = await pool.connect();
+    const result = await client.query('SELECT * FROM test_table');
+    const results = { 'results': (result) ? result.rows : null};
+    res.render('pages/db', results );
+    client.release();
+  } catch (err) {
+    console.error(err);
+    res.send("Error " + err);
+  }
+})
+
 //Create Server
 const app = express();
 //Tell our app to use tools
