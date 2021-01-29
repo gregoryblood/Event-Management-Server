@@ -1,8 +1,14 @@
 const express = require('express'); // Express web server framework
+const pullTable = require('./pullTable.js'); //For db
+var cookieParser = require('cookie-parser'); //For tokens
+const path = require('path'); //For outh
+var client_id = process.env.CLIENT_ID; // Your client id
+var client_secret = process.env.CLIENT_SECRET; // Your secret
+var redirect_uri = 'https://localhost:3000/callback'; // Your redirect uri
 const  PORT = process.env.PORT || 8888; ///Finds the port the server is being ran on
 //Create Server
 const app = express();
-const pullTable = require('./pullTable.js');
+
 var cors = require('cors');
 
 //Using an Express Server
