@@ -38,6 +38,44 @@ const numEvents = (name, description, location, edate, etime) => {
     })
   }) 
 }
+//Updates Max Slots
+const updateMaxSlots = (id, num) => {
+  return new Promise(function(resolve, reject) {
+    pool.query(
+          'UPDATE events SET maxSlots = '+num+' WHERE id='+id, (error, results
+        ) => {
+      if (error) {
+        reject(error)
+      }
+      resolve(results.rows);
+    })
+  }) 
+}
+//Add person to event
+const addAttendee = (id) => {
+  return new Promise(function(resolve, reject) {
+    pool.query(
+          'UPDATE events SET slots = slots + 1 WHERE id='+id, (error, results
+        ) => {
+      if (error) {
+        reject(error)
+      }
+      resolve(results.rows);
+    })
+  }) 
+}
+const removeAttendee = (id) => {
+  return new Promise(function(resolve, reject) {
+    pool.query(
+          'UPDATE events SET slots = slots - 1 WHERE id='+id, (error, results
+        ) => {
+      if (error) {
+        reject(error)
+      }
+      resolve(results.rows);
+    })
+  }) 
+}
 //Returns every event made
 const getOneEvent = (id) => {
   return new Promise(function(resolve, reject) {
@@ -50,7 +88,7 @@ const getOneEvent = (id) => {
   }) 
 }
 //Adds One Event 
-//[THIS IS BROKEN BECUASE THE WHOLE THING WILL CHANGE LATER]
+//[THIS IS BROKEN BECUASE I EXPECT CHANGE LATER]
 const addOneEvent = (id, name, description, location, edate, etime) => {
   return new Promise(function(resolve, reject) {
     pool.query(
@@ -69,4 +107,7 @@ module.exports = {
     numEvents,
     getOneEvent,
     addOneEvent,
+    addAttendee,
+    removeAttendee,
+    updateMaxSlots,
   }

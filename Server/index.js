@@ -2,9 +2,10 @@ const express = require('express'); // Express web server framework
 const pullTable = require('./pullTable.js'); //For db
 var cookieParser = require('cookie-parser'); //For tokens
 const path = require('path'); //For outh
+var querystring = require('querystring'); //Tool for api querys
 var client_id = process.env.CLIENT_ID; // Your client id
 var client_secret = process.env.CLIENT_SECRET; // Your secret
-var redirect_uri = 'https://localhost:3000/callback'; // Your redirect uri
+var redirect_uri = 'https://localhost:8888/callback'; // Your redirect uri
 const  PORT = process.env.PORT || 8888; ///Finds the port the server is being ran on
 //Create Server
 const app = express();
@@ -43,10 +44,47 @@ app.get('/count', (req, res) => {
   })
 });
 //Gets one event and its data
-app.get('/:id', (req, res) => {
+app.get('/get/:id', (req, res) => {
   const id = req.params.id;
   console.log("== req.params:", req.params);
   pullTable.getOneEvent(id)
+  .then(response => {
+    res.status(200).send(response);
+  })
+  .catch(error => {
+    res.status(500).send(error);
+  })
+});
+//Updates max slots for event
+app.get('/updatemaxslots/:id/:num', (req, res) => {
+  const id = req.params.id;
+  const num = req.params.num;
+  console.log("== req.params:", req.params);
+  pullTable.updateMaxSlots(id, num)
+  .then(response => {
+    res.status(200).send(response);
+  })
+  .catch(error => {
+    res.status(500).send(error);
+  })
+});
+//Signs up for Event
+app.get('/addattendee/:id/', (req, res) => {
+  const id = req.params.id;
+  console.log("== req.params:", req.params);
+  pullTable.addAttendee(id)
+  .then(response => {
+    res.status(200).send(response);
+  })
+  .catch(error => {
+    res.status(500).send(error);
+  })
+});
+//Signs up for Event
+app.get('/removeattendee/:id/', (req, res) => {
+  const id = req.params.id;
+  console.log("== req.params:", req.params);
+  pullTable.removeAttendee(id)
   .then(response => {
     res.status(200).send(response);
   })
@@ -72,6 +110,102 @@ app.get('/add/:name+:description+:location+:edate+:etime', (req, res) => {
     res.status(500).send(error);
   })
 });
+
+//-----------------------
+// AUTHENTIFICATION STUFF
+//-----------------------
+//This will for updating our state
+
+var generateRandomString = function(length) {
+  var text = '';
+  var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+  for (var i = 0; i < length; i++) {
+    text += possible.charAt(Math.floor(Math.random() * possible.length));
+  }
+  return text;
+};
+
+var stateKey = 'osu_auth_state';
+//Handling Logging in
+app.get('/login', function(req, res) {
+
+  var state = generateRandomString(16);
+  res.cookie(stateKey, state);
+
+  // your application requests authorization
+  res.redirect('https://api.oregonstate.edu/oauth2/token?' +
+    querystring.stringify({
+      client_id: client_id,
+      client_secret: client_secret,
+      grant_type: "client_credentials"
+    }));
+});
+
+//This is used for when our api goes through
+app.get('/callback', function(req, res) {
+
+  // your application requests refresh and access tokens
+  // after checking the state parameter
+
+  var code = req.query.code || null;
+  var state = req.query.state || null;
+  var storedState = req.cookies ? req.cookies[stateKey] : null;
+
+  if (state === null || state !== storedState) {
+    res.redirect('/' +
+      querystring.stringify({
+        error: 'state_mismatch'
+      }));
+  } else {
+    res.clearCookie(stateKey);
+    var authOptions = {
+      url: 'https://api.oregonstate.edu/oauth2/token',
+      form: {
+        code: code,
+        redirect_uri: redirect_uri,
+        grant_type: 'authorization_code'
+      },
+      headers: {
+        'Authorization': 'Basic ' + (new Buffer(client_id + ':' + client_secret).toString('base64'))
+      },
+      json: true
+    };
+
+    request.post(authOptions, function(error, response, body) {
+      if (!error && response.statusCode === 200) {
+
+        var access_token = body.access_token,
+            refresh_token = body.refresh_token;
+
+        var options = {
+          url: 'https://api.oregonstate.edu/v2/directory?page%5Bnumber%5D=1&page%5Bsize%5D=1&filter%5Bonid%5D=bloodg',
+          headers: { 'Authorization': 'Bearer ' + access_token },
+          json: true
+        };
+
+        // use the access token to access the Spotify Web API
+        request.get(options, function(error, response, body) {
+          console.log(body);
+        });
+
+        // we can also pass the token to the browser to make requests from there
+        res.redirect(
+          `https://localhost:8888/${querystring.stringify({
+            access_token,
+            refresh_token,
+          })}`,
+        );
+      } else {
+        res.redirect('/' +
+          querystring.stringify({
+            error: 'invalid_token'
+          }));
+      }
+    });
+  }
+});
+
 
 //Function to console log that the server is running
 app.listen(PORT, function () {
