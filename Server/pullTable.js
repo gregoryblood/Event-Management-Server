@@ -16,98 +16,111 @@ const pool = new Pool({
 
 //Returns every event made
 const getEvents = () => {
-    return new Promise(function(resolve, reject) {
-      pool.query('SELECT * FROM events', (error, results) => {
-        if (error) {
-          reject(error)
-        }
-        resolve(results.rows);
-      })
-    }) 
+  return new Promise(function (resolve, reject) {
+    pool.query('SELECT * FROM events', (error, results) => {
+      if (error) {
+        reject(error)
+      }
+      resolve(results.rows);
+    })
+  })
+}
+//Get event by startTime and endTime
+const getEventsByTime = (start, end) => {
+  return new Promise(function (resolve, reject) {
+    pool.query("SELECT * FROM events WHERE edate BETWEEN '"+start+"' AND '"+end+"'", (error, results) => {
+      if (error) {
+        reject(error)
+      }
+      console.log(results)
+      resolve(results.rows);
+    })
+  })
 }
 //Returns # of events
 const numEvents = (name, description, location, edate, etime) => {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     pool.query(
-          'SELECT COUNT(*) FROM events', (error, results
-        ) => {
+      'SELECT COUNT(*) FROM events', (error, results
+      ) => {
       if (error) {
         reject(error)
       }
       resolve(results.rows);
     })
-  }) 
+  })
 }
 //Updates Max Slots
 const updateMaxSlots = (id, num) => {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     pool.query(
-          'UPDATE events SET maxSlots = '+num+' WHERE id='+id, (error, results
-        ) => {
+      'UPDATE events SET maxSlots = ' + num + ' WHERE id=' + id, (error, results
+      ) => {
       if (error) {
         reject(error)
       }
       resolve(results.rows);
     })
-  }) 
+  })
 }
 //Add person to event
 const addAttendee = (id) => {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     pool.query(
-          'UPDATE events SET slots = slots + 1 WHERE id='+id, (error, results
-        ) => {
+      'UPDATE events SET slots = slots + 1 WHERE id=' + id, (error, results
+      ) => {
       if (error) {
         reject(error)
       }
       resolve(results.rows);
     })
-  }) 
+  })
 }
 const removeAttendee = (id) => {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     pool.query(
-          'UPDATE events SET slots = slots - 1 WHERE id='+id, (error, results
-        ) => {
+      'UPDATE events SET slots = slots - 1 WHERE id=' + id, (error, results
+      ) => {
       if (error) {
         reject(error)
       }
       resolve(results.rows);
     })
-  }) 
+  })
 }
 //Returns every event made
 const getOneEvent = (id) => {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     pool.query('SELECT * FROM events Where id = ' + id, (error, results) => {
       if (error) {
         reject(error)
       }
       resolve(results.rows);
     })
-  }) 
+  })
 }
 //Adds One Event 
 //[THIS IS BROKEN BECUASE I EXPECT CHANGE LATER]
 const addOneEvent = (id, name, description, location, edate, etime) => {
-  return new Promise(function(resolve, reject) {
+  return new Promise(function (resolve, reject) {
     pool.query(
-          'INSERT INTO events(id, name, description, location, edate, etime) VALUES ( \''+id +'\', \''+name +'\', \''+description +'\',\''+location +'\',\''+edate +'\',\''+etime+'\',', (error, results
-        ) => {
+      'INSERT INTO events(id, name, description, location, edate, etime) VALUES ( \'' + id + '\', \'' + name + '\', \'' + description + '\',\'' + location + '\',\'' + edate + '\',\'' + etime + '\',', (error, results
+      ) => {
       if (error) {
         reject(error)
       }
       resolve(results.rows);
     })
-  }) 
+  })
 }
 
 module.exports = {
-    getEvents,
-    numEvents,
-    getOneEvent,
-    addOneEvent,
-    addAttendee,
-    removeAttendee,
-    updateMaxSlots,
-  }
+  getEvents,
+  getEventsByTime,
+  numEvents,
+  getOneEvent,
+  addOneEvent,
+  addAttendee,
+  removeAttendee,
+  updateMaxSlots,
+}
