@@ -102,14 +102,16 @@ const getOneEvent = (id) => {
 //Adds One Event 
 //[THIS IS BROKEN BECUASE I EXPECT CHANGE LATER]
 const addOneEvent = (id, name, description, location, edate, etime) => {
+
   return new Promise(function (resolve, reject) {
     pool.query(
-      'INSERT INTO events(id, name, description, location, edate, etime) VALUES ( \'' + id + '\', \'' + name + '\', \'' + description + '\',\'' + location + '\',\'' + edate + '\',\'' + etime + '\',', (error, results
+      "INSERT INTO events (id, name, description, location, edate, etime,slots,maxslots)VALUES("+id+",'"+name+"','"+description+"','"+location+"','"+edate+"','"+etime+"',0,0)", (error, results
       ) => {
       if (error) {
         reject(error)
       }
-      resolve(results.rows);
+      console.log("results:",results,error)
+      resolve("success");
     })
   })
 }

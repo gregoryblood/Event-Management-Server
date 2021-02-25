@@ -104,22 +104,26 @@ app.get('/removeattendee/:id/', (req, res) => {
     })
 });
 //Gets one event and its data
-app.get('/add/:name+:description+:location+:edate+:etime', (req, res) => {
-  const id = pullTable.numEvents();
-  const name = req.params.name;
-  const description = req.params.description;
-  const location = req.params.location;
-  const edate = req.params.edate;
-  const etime = req.params.etime;
-
-  console.log("== req.params:", req.params);
-  pullTable.addOneEvent(id, name, description, location, edate, etime)
+app.post('/add', (req, res) => {
+  console.log("=========================================req:")
+  console.log(req)
+  const name = req.body.name;
+  const description = req.body.description;
+  const location = req.body.location;
+  const edate = req.body.edate;
+  const etime = req.body.etime;
+  pullTable.numEvents().then(num=>{
+    pullTable.addOneEvent(num[0].count, name, description, location, edate, etime)
     .then(response => {
       res.status(200).send(response);
     })
     .catch(error => {
       res.status(500).send(error);
     })
+  })
+  .catch(error => {
+    res.status(500).send(error);
+  })
 });
 
 //-----------------------
