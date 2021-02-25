@@ -105,15 +105,17 @@ app.get('/removeattendee/:id/', (req, res) => {
 });
 //Gets one event and its data
 app.post('/add', (req, res) => {
-  console.log("=========================================req:")
-  console.log(req)
-  const name = req.body.name;
+  //console.log("=========================================req:")
+  //console.log(req)
+  const ename = req.body.name;
   const description = req.body.description;
   const location = req.body.location;
   const edate = req.body.edate;
   const etime = req.body.etime;
+  const slots = req.body.slots;
+  const maxslots = req.body.maxslots;
   pullTable.numEvents().then(num=>{
-    pullTable.addOneEvent(num[0].count, name, description, location, edate, etime)
+    pullTable.addOneEvent(num[0].count, ename, description, location, edate, etime, slots, maxslots)
     .then(response => {
       res.status(200).send(response);
     })
@@ -125,6 +127,16 @@ app.post('/add', (req, res) => {
     res.status(500).send(error);
   })
 });
+app.get('/remove/:id', (req, res) => {
+  const id = req.params.id;
+  pullTable.removeOneEvent(id)
+    .then(response => {
+      res.status(200).send(response);
+    })
+    .catch(error => {
+      res.status(500).send(error);
+    })
+})
 
 //-----------------------
 // AUTHENTIFICATION STUFF
