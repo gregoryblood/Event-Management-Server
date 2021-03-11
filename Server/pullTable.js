@@ -17,7 +17,28 @@ const pool = new Pool({
 //Returns every event made
 const getEvents = () => {
   return new Promise(function (resolve, reject) {
-    pool.query('SELECT * FROM events', (error, results) => {
+    pool.query('SELECT * FROM events ORDER BY edate ASC', (error, results) => {
+      if (error) {
+        reject(error)
+      }
+      resolve(results.rows);
+    })
+  })
+}
+const getEventsWithSlots = () => {
+  return new Promise(function (resolve, reject) {
+    pool.query('SELECT * FROM events WHERE slots > 0', (error, results) => {
+      if (error) {
+        reject(error)
+      }
+      resolve(results.rows);
+    })
+  })
+}
+//Get event by startTime and endTime
+const searchEvents = (keyword) => {
+  return new Promise(function (resolve, reject) {
+    pool.query('SELECT * FROM events WHERE name LIKE \'%' + keyword + '%\' OR description LIKE \'%' + keyword + '%\'', (error, results) => {
       if (error) {
         reject(error)
       }
@@ -99,12 +120,11 @@ const getOneEvent = (id) => {
     })
   })
 }
-//Adds One Event 
-//[THIS IS BROKEN BECUASE I EXPECT CHANGE LATER]
-const addOneEvent = (id, name, description, location, edate, etime) => {
+//Adds One Event  
+const addOneEvent = (id, name, description, location, edate, etime, slots, maxslots) => {
   return new Promise(function (resolve, reject) {
     pool.query(
-      "INSERT INTO events (id, name, description, location, edate, etime,slots,maxslots)VALUES("+id+",'"+ename+"','"+description+"','"+location+"','"+edate+"','"+etime+"','"+slots+"','"+maxslots+"')", (error, results
+      "INSERT INTO events (id, name, description, location, edate, etime,slots,maxslots)VALUES("+id+",'"+name+"','"+description+"','"+location+"','"+edate+"','"+etime+"','"+slots+"','"+maxslots+"')", (error, results
         ) => {
       if (error) {
         reject(error)
@@ -130,6 +150,7 @@ const removeOneEvent = (id) => {
 
 module.exports = {
   getEvents,
+  getEventsWithSlots,
   getEventsByTime,
   numEvents,
   getOneEvent,
@@ -138,4 +159,5 @@ module.exports = {
   addAttendee,
   removeAttendee,
   updateMaxSlots,
+  searchEvents,
 }

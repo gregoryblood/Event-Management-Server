@@ -33,6 +33,27 @@ app.get('/', (req, res) => {
       res.status(500).send(error);
     })
 });
+//Gets All events with slots more than 0 [WILL REMOVE LATER]
+app.get('/getwithslots/', (req, res) => {
+  pullTable.getEventsWithSlots()
+    .then(response => {
+      res.status(200).send(response);
+    })
+    .catch(error => {
+      res.status(500).send(error);
+    })
+});
+//Searches
+app.get('/search/:keyword', (req, res) => {
+  const keyword = req.params.keyword
+  pullTable.searchEvents(keyword)
+    .then(response => {
+      res.status(200).send(response);
+    })
+    .catch(error => {
+      res.status(500).send(error);
+    })
+});
 //Get event by startTime and endTime
 app.get('/getByTime/:start/:end', (req, res) => {
   console.log("== req.params:", req.params);
@@ -107,7 +128,7 @@ app.get('/removeattendee/:id/', (req, res) => {
 app.post('/add', (req, res) => {
   //console.log("=========================================req:")
   //console.log(req)
-  const ename = req.body.name;
+  const name = req.body.name;
   const description = req.body.description;
   const location = req.body.location;
   const edate = req.body.edate;
@@ -115,10 +136,10 @@ app.post('/add', (req, res) => {
   const slots = req.body.slots;
   const maxslots = req.body.maxslots;
   pullTable.numEvents().then(num=>{
-    pullTable.addOneEvent(num[0].count, ename, description, location, edate, etime, slots, maxslots)
+    pullTable.addOneEvent(num[0].count, name, description, location, edate, etime, slots, maxslots)
     .then(response => {
       res.status(200).send(response);
-    })
+    })  
     .catch(error => {
       res.status(500).send(error);
     })
