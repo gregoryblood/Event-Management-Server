@@ -110,11 +110,10 @@ app.get('/updatemaxslots/:id/:num', (req, res) => {
     .catch(error => {
       res.status(500).send(error);
     })
-});
+}); 
 //Signs up for Event
 app.get('/addattendee/:id/', (req, res) => {
   const id = req.params.id;
-  console.log("== req.params:", req.params);
   pullTable.addAttendee(id)
     .then(response => {
       res.status(200).send(response);
@@ -126,7 +125,6 @@ app.get('/addattendee/:id/', (req, res) => {
 //Signs up for Event
 app.get('/removeattendee/:id/', (req, res) => {
   const id = req.params.id;
-  console.log("== req.params:", req.params);
   pullTable.removeAttendee(id)
     .then(response => {
       res.status(200).send(response);
@@ -137,6 +135,7 @@ app.get('/removeattendee/:id/', (req, res) => {
 });
 //Adds One event
 app.post('/add', (req, res) => {
+  const id = req.body.id;
   const name = req.body.name;
   const description = req.body.description;
   const location = req.body.location;
@@ -144,18 +143,13 @@ app.post('/add', (req, res) => {
   const etime = req.body.etime;
   const slots = req.body.slots;
   const maxslots = req.body.maxslots;
-  pullTable.numEvents().then(num=>{
-    pullTable.addOneEvent( (parseInt(num[0].count) + 1), name, description, location, edate, etime, slots, maxslots)
+  pullTable.addOneEvent( id, name, description, location, edate, etime, slots, maxslots)
     .then(response => {
       res.status(200).send(response);
     })  
     .catch(error => {
       res.status(500).send(error);
     })
-  })
-  .catch(error => {
-    res.status(500).send(error);
-  })
 });
 //Edits One event
 app.post('/edit', (req, res) => {
@@ -167,14 +161,13 @@ app.post('/edit', (req, res) => {
   const etime = req.body.etime;
   const slots = req.body.slots;
   const maxslots = req.body.maxslots;
-  pullTable.editEvent( (id, name, description, location, edate, etime, slots, maxslots)
+  pullTable.editEvent(id, name, description, location, edate, etime, slots, maxslots)
     .then(response => {
       res.status(200).send(response);
     })  
     .catch(error => {
       res.status(500).send(error);
     })
-  )
 });
 
 //Removes an Event
