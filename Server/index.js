@@ -64,7 +64,18 @@ app.get('/getByTime/:start/:end', (req, res) => {
     .catch(error => {
       res.status(500).send(error);
     })
-});
+}); 
+//Get event by startTime and endTime
+app.get('/getByDay/:day', (req, res) => {
+  console.log("== req.params:", req.params);
+  pullTable.getEventsByDay(req.params.day)
+    .then(response => {
+      res.status(200).send(response);
+    })
+    .catch(error => {
+      res.status(500).send(error);
+    })
+}); 
 //Gets # of events
 app.get('/count', (req, res) => {
   pullTable.numEvents()
@@ -124,10 +135,8 @@ app.get('/removeattendee/:id/', (req, res) => {
       res.status(500).send(error);
     })
 });
-//Gets one event and its data
+//Adds One event
 app.post('/add', (req, res) => {
-  //console.log("=========================================req:")
-  //console.log(req)
   const name = req.body.name;
   const description = req.body.description;
   const location = req.body.location;
@@ -136,7 +145,7 @@ app.post('/add', (req, res) => {
   const slots = req.body.slots;
   const maxslots = req.body.maxslots;
   pullTable.numEvents().then(num=>{
-    pullTable.addOneEvent(num[0].count, name, description, location, edate, etime, slots, maxslots)
+    pullTable.addOneEvent( (parseInt(num[0].count) + 1), name, description, location, edate, etime, slots, maxslots)
     .then(response => {
       res.status(200).send(response);
     })  
@@ -148,6 +157,27 @@ app.post('/add', (req, res) => {
     res.status(500).send(error);
   })
 });
+//Edits One event
+app.post('/edit', (req, res) => {
+  const id = req.body.id;
+  const name = req.body.name;
+  const description = req.body.description;
+  const location = req.body.location;
+  const edate = req.body.edate;
+  const etime = req.body.etime;
+  const slots = req.body.slots;
+  const maxslots = req.body.maxslots;
+  pullTable.editEvent( (id, name, description, location, edate, etime, slots, maxslots)
+    .then(response => {
+      res.status(200).send(response);
+    })  
+    .catch(error => {
+      res.status(500).send(error);
+    })
+  )
+});
+
+//Removes an Event
 app.get('/remove/:id', (req, res) => {
   const id = req.params.id;
   pullTable.removeOneEvent(id)
