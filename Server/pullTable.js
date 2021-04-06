@@ -159,7 +159,7 @@ const editEvent = (id, name, description, location, edate, etime, slots, maxslot
       resolve("success");
     })
   })     
-}   
+}     
 //Removes an event
 const removeOneEvent = (id) => {
   return new Promise(function (resolve, reject) {

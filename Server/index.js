@@ -1,16 +1,20 @@
+require('dotenv').config();
 const express = require('express'); // Express web server framework
 const pullTable = require('./pullTable.js'); //For db
+var request = require('request');
 var cookieParser = require('cookie-parser'); //For tokens
+var cors = require('cors'); //Cors headers
 const path = require('path'); //For outh
 var querystring = require('querystring'); //Tool for api querys
 var client_id = process.env.CLIENT_ID; // Your client id
 var client_secret = process.env.CLIENT_SECRET; // Your secret
-var redirect_uri = 'https://localhost:8888/callback'; // Your redirect uri
+var redirect_uri = 'https://osu-event-server.herokuapp.com/callback'; // Your redirect uri
 const PORT = process.env.PORT || 8888; ///Finds the port the server is being ran on
 //Create Server
 const app = express();
 
-var cors = require('cors');
+
+
 
 //Using an Express Server
 app.use(express.json());
@@ -197,28 +201,92 @@ var generateRandomString = function (length) {
   return text;
 };
 
-var stateKey = 'osu_auth_state';
+var bearerToken = '';
+
 //Handling Logging in
 app.get('/login', function (req, res) {
 
-  var state = generateRandomString(16);
-  res.cookie(stateKey, state);
 
-  // your application requests authorization
-  res.redirect('https://api.oregonstate.edu/oauth2/token?' +
-    querystring.stringify({
-      client_id: client_id,
-      client_secret: client_secret,
-      grant_type: "client_credentials"
-    }));
+  var headers = {
+    'accept': 'application/json',
+    'Content-Type': 'application/x-www-form-urlencoded'
+  };
+  var dataString = 'client_id=CXgJb9qKGN6EtcsVQasPGh24ZB9MI4U4&client_secret=oq2XYLl1Obv5z7ZQ&grant_type=client_credentials';
+  var options = {
+    url: 'https://api.oregonstate.edu/oauth2/token',
+    method: 'POST',
+    headers: headers, 
+    body: dataString
+  };
+  //Called once request happens
+  function callback(error, response, body) {
+    if (!error && response.statusCode == 200) {
+      //console.log(body);
+      const obj = JSON.parse(body);
+      bearerToken = obj.access_token;
+      //console.log(bearerToken);
+      Next(res, bearerToken);
+    }
+  }
+  request(options, callback);
+});
+function Next (res, token) {
+
+  var headers = {
+    'accept': 'application/json',
+    'authorization': ("Bearer "+token+"")
+  };
+  var options = {
+    url: 'https://api.oregonstate.edu/v2/directory?page%5Bnumber%5D=1&page%5Bsize%5D=1&filter%5BemailAddress%5D=bloodg%40oregonstate.edu',
+    headers: headers
+  };
+
+  function callback(error, response, body) {
+    if (!error && response.statusCode == 200) {
+        //console.log(body);
+        const obj = JSON.parse(body);
+        //console.log(obj.data[0].attributes.primaryAffiliation);
+        res.status(200).send(obj.data[0].attributes.primaryAffiliation);
+        //res.redirect('http://localhost:8888/');
+    }
+    else {
+      console.error('Error: ' + response.statusCode+'\n'+body)
+      res.redirect('http://localhost:8888/');
+    }
+  }
+
+  request(options, callback);
+}
+//Gets the info of the user based on email
+app.get('/getinfo', function (req, res) {
+  var storedState = req.cookies ? req.cookies['BearerToken'] : null;
+
+  var headers = {
+    'accept': 'application/json',
+    'authorization': 'BearerToken ' + storedState
+  };
+
+  var options = {
+    url: 'https://api.oregonstate.edu/v2/directory?page%5Bnumber%5D=1&page%5Bsize%5D=1&filter%5BemailAddress%5D=bloodg%40oregonstate.edu',
+    headers: headers
+  };
+
+  function callback(error, response, body) {
+    if (!error && response.statusCode == 200) {
+        console.log(body);
+    }
+    else {
+      console.error('Error: '+response.statusCode)
+    }
+  }
+
+  request(options, callback);
 });
 
 //This is used for when our api goes through
 app.get('/callback', function (req, res) {
-
-  // your application requests refresh and access tokens
+    // your application requests refresh and access tokens
   // after checking the state parameter
-
   var code = req.query.code || null;
   var state = req.query.state || null;
   var storedState = req.cookies ? req.cookies[stateKey] : null;
@@ -262,7 +330,7 @@ app.get('/callback', function (req, res) {
 
         // we can also pass the token to the browser to make requests from there
         res.redirect(
-          `https://localhost:8888/${querystring.stringify({
+          `https://osu-event-server.herokuapp.com/${querystring.stringify({
             access_token,
             refresh_token,
           })}`,
@@ -276,6 +344,7 @@ app.get('/callback', function (req, res) {
     });
   }
 });
+
 
 
 //Function to console log that the server is running
