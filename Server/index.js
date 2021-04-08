@@ -147,7 +147,7 @@ app.post('/add', (req, res) => {
   const etime = req.body.etime;
   const slots = req.body.slots;
   const maxslots = req.body.maxslots;
-  pullTable.addOneEvent( id, name, description, location, edate, etime, slots, maxslots)
+  pullTable.addOneEvent( id, name, description, location, edate, etime, slots, maxslots, author)
     .then(response => {
       res.status(200).send(response);
     })  

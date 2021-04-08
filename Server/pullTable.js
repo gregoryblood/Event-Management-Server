@@ -150,7 +150,7 @@ const addOneEvent = (id, name, description, location, edate, etime, slots, maxsl
 const editEvent = (id, name, description, location, edate, etime, slots, maxslots) => {
   return new Promise(function (resolve, reject) {
     pool.query(
-      "UPDATE events set id="+id+", name="+name+", description="+description+", location="+location+", edate="+edate+", etime="+etime+",slots="+slots+",maxslots="+maxslots+" WHERE id = "+id+";", (error, results
+      "UPDATE events SET id='"+id+"', name='"+name+"', description='"+description+"', location='"+location+"', edate='"+edate+"', etime='"+etime+"',slots='"+slots+"',maxslots='"+maxslots+"' WHERE id = '"+id+"';", (error, results
         ) => {
       if (error) {
         reject(error)
