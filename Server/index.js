@@ -1,4 +1,4 @@
-require('dotenv').config();
+// require('dotenv').config();
 const express = require('express'); // Express web server framework
 const pullTable = require('./pullTable.js'); //For db
 var request = require('request');
@@ -6,6 +6,7 @@ var cookieParser = require('cookie-parser'); //For tokens
 var cors = require('cors'); //Cors headers
 const path = require('path'); //For outh
 var querystring = require('querystring'); //Tool for api querys
+const { Console } = require('console');
 var client_id = process.env.CLIENT_ID; // Your client id
 var client_secret = process.env.CLIENT_SECRET; // Your secret
 var redirect_uri = 'https://osu-event-server.herokuapp.com/callback'; // Your redirect uri
@@ -31,6 +32,12 @@ app.use(cors());
 app.get('/', (req, res) => {
   pullTable.getEvents()
     .then(response => {
+      // console.log(response)
+      response.forEach(element => {
+        if(element.author){
+          element.author = JSON.parse(element.author)
+        }
+      });
       res.status(200).send(response);
     })
     .catch(error => {
@@ -116,9 +123,10 @@ app.get('/updatemaxslots/:id/:num', (req, res) => {
     })
 }); 
 //Signs up for Event
-app.get('/addattendee/:id/', (req, res) => {
+app.get('/addattendee/:id/:array', (req, res) => {
   const id = req.params.id;
-  pullTable.addAttendee(id)
+  const array = req.params.array;
+  pullTable.addAttendee(id,array)
     .then(response => {
       res.status(200).send(response);
     })
