@@ -147,6 +147,7 @@ app.post('/add', (req, res) => {
   const etime = req.body.etime;
   const slots = req.body.slots;
   const maxslots = req.body.maxslots;
+  const author = req.body.author;
   pullTable.addOneEvent( id, name, description, location, edate, etime, slots, maxslots, author)
     .then(response => {
       res.status(200).send(response);
@@ -180,7 +181,7 @@ app.get('/remove/:id', (req, res) => {
   pullTable.removeOneEvent(id)
     .then(response => {
       res.status(200).send(response);
-    })
+    }) 
     .catch(error => {
       res.status(500).send(error);
     })
@@ -202,11 +203,9 @@ var generateRandomString = function (length) {
 };
 
 var bearerToken = '';
-
+ 
 //Handling Logging in
-app.get('/login', function (req, res) {
-
-
+app.post('/login/', (req, res) => {
   var headers = {
     'accept': 'application/json',
     'Content-Type': 'application/x-www-form-urlencoded'
@@ -224,34 +223,38 @@ app.get('/login', function (req, res) {
       //console.log(body);
       const obj = JSON.parse(body);
       bearerToken = obj.access_token;
-      //console.log(bearerToken);
-      Next(res, bearerToken);
+      //console.log(bearerToken); 
+      Next(req, res, bearerToken);
     }
   }
   request(options, callback);
 });
-function Next (res, token) {
-
+function Next (req, res, token) {
+  var email = req.body.email;
+  encodeURIComponent(email)
   var headers = {
     'accept': 'application/json',
     'authorization': ("Bearer "+token+"")
   };
   var options = {
-    url: 'https://api.oregonstate.edu/v2/directory?page%5Bnumber%5D=1&page%5Bsize%5D=1&filter%5BemailAddress%5D=bloodg%40oregonstate.edu',
+    url: 'https://api.oregonstate.edu/v2/directory?page%5Bnumber%5D=1&page%5Bsize%5D=1&filter%5BemailAddress%5D='+email,
     headers: headers
-  };
+  }; 
 
   function callback(error, response, body) {
     if (!error && response.statusCode == 200) {
-        //console.log(body);
         const obj = JSON.parse(body);
         //console.log(obj.data[0].attributes.primaryAffiliation);
+        if (typeof obj.data[0].attributes.primaryAffiliation === 'undefined') {
+          res.status(404)
+        } 
         res.status(200).send(obj.data[0].attributes.primaryAffiliation);
+        
         //res.redirect('http://localhost:8888/');
     }
     else {
       console.error('Error: ' + response.statusCode+'\n'+body)
-      res.redirect('http://localhost:8888/');
+      //res.redirect('http://localhost:8888/');
     }
   }
 

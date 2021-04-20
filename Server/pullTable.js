@@ -38,13 +38,13 @@ const getEventsWithSlots = () => {
 //Get event by startTime and endTime
 const searchEvents = (keyword) => {
   return new Promise(function (resolve, reject) {
-    pool.query('SELECT * FROM events WHERE name LIKE \'% ' + keyword + '%\' OR description LIKE \'%' + keyword + '%\' ORDER BY edate ASC', (error, results) => {
+    pool.query('SELECT DISTINCT * FROM events WHERE UPPER(name) LIKE UPPER(\'%' + keyword + '%\') OR UPPER(description) LIKE UPPER(\'%' + keyword + '%\') ORDER BY edate ASC', (error, results) => {
       if (error) {
         reject(error)
       }
       resolve(results.rows);
     })
-  })
+  })  
 }
 //Get event by startTime and endTime
 const getEventsByTime = (start, end) => {
