@@ -7,6 +7,7 @@ var cors = require('cors'); //Cors headers
 const path = require('path'); //For outh
 var querystring = require('querystring'); //Tool for api querys
 var client_id = process.env.CLIENT_ID; // Your client id
+
 var client_secret = process.env.CLIENT_SECRET; // Your secret
 var redirect_uri = 'https://osu-event-server.herokuapp.com/callback'; // Your redirect uri
 const PORT = process.env.PORT || 8888; ///Finds the port the server is being ran on
@@ -118,7 +119,8 @@ app.get('/updatemaxslots/:id/:num', (req, res) => {
 //Signs up for Event
 app.get('/addattendee/:id/', (req, res) => {
   const id = req.params.id;
-  pullTable.addAttendee(id)
+  const array = req.body.array;
+  pullTable.addAttendee(id,array)
     .then(response => {
       res.status(200).send(response);
     })
@@ -129,7 +131,9 @@ app.get('/addattendee/:id/', (req, res) => {
 //Signs up for Event
 app.get('/removeattendee/:id/', (req, res) => {
   const id = req.params.id;
-  pullTable.removeAttendee(id)
+  const array = req.body.array;
+
+  pullTable.removeAttendee(id, array)
     .then(response => {
       res.status(200).send(response);
     })

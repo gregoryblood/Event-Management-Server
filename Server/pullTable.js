@@ -97,21 +97,23 @@ const updateMaxSlots = (id, num) => {
   })
 }
 //Add person to event
-const addAttendee = (id) => {
+const addAttendee = (id, array) => {
   return new Promise(function (resolve, reject) {
     pool.query(
+      "UPDATE events SET signedUp = '"+array+"' WHERE id=\'" + id + "\';"+
       'UPDATE events SET slots = slots + 1 WHERE id=\'' + id + "\';", (error, results
       ) => {
       if (error) {
         reject(error)
       }
-      resolve(results.rows);
+      resolve(results);
     })
   })
 }
-const removeAttendee = (id) => {
+const removeAttendee = (id, array) => {
   return new Promise(function (resolve, reject) {
     pool.query(
+      "UPDATE events SET signedUp = '"+array+"' WHERE id=\'" + id + "\';"+
       'UPDATE events SET slots = slots - 1 WHERE id=\'' + id + "\';", (error, results
       ) => {
       if (error) {
