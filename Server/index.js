@@ -1,4 +1,4 @@
-require('dotenv').config();
+//require('dotenv').config();
 const express = require('express'); // Express web server framework
 const pullTable = require('./pullTable.js'); //For db
 var request = require('request');
@@ -117,10 +117,12 @@ app.get('/updatemaxslots/:id/:num', (req, res) => {
     })
 }); 
 //Signs up for Event
-app.get('/addattendee/:id/', (req, res) => {
+app.get('/addattendee/:id/:email/:name', (req, res) => {
   const id = req.params.id;
-  const array = req.body.array;
-  pullTable.addAttendee(id,array)
+  //const array = req.body.array;
+  const email = req.params.email;
+  const name = req.params.name;
+  pullTable.addAttendee(id, email, name)
     .then(response => {
       res.status(200).send(response);
     })
@@ -129,12 +131,28 @@ app.get('/addattendee/:id/', (req, res) => {
     })
 });
 //Signs up for Event
-app.get('/removeattendee/:id/', (req, res) => {
+app.get('/removeattendee/:id/:email/:name', (req, res) => {
   const id = req.params.id;
-  const array = req.body.array;
-
-  pullTable.removeAttendee(id, array)
+  //const array = req.body.array;
+  const email = req.params.email;
+  const name = req.params.name;
+  pullTable.removeAttendee(id, email, name)
     .then(response => {
+      //console.log(response);
+      res.status(200).send(response);
+    })
+    .catch(error => {
+      res.status(500).send(error);
+    })
+});
+//Signs up for Event
+app.get('/getattendee/:id/', (req, res) => {
+  const id = req.params.id;
+  //const array = req.body.array;
+
+  pullTable.getAttendee(id)
+    .then(response => {
+      console.log(response);
       res.status(200).send(response);
     })
     .catch(error => {
