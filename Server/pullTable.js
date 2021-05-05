@@ -44,12 +44,12 @@ const searchEvents = (keyword) => {
       }
       resolve(results.rows);
     })
-  })  
+  })
 }
 //Get event by startTime and endTime
 const getEventsByTime = (start, end) => {
   return new Promise(function (resolve, reject) {
-    pool.query("SELECT * FROM events WHERE edate BETWEEN '"+start+"' AND '"+end+"'", (error, results) => {
+    pool.query("SELECT * FROM events WHERE edate BETWEEN '" + start + "' AND '" + end + "'", (error, results) => {
       if (error) {
         reject(error)
       }
@@ -61,7 +61,7 @@ const getEventsByTime = (start, end) => {
 //Get event by day
 const getEventsByDay = (day) => {
   return new Promise(function (resolve, reject) {
-    pool.query("SELECT * FROM events WHERE edate = '"+day+"' ORDER BY edate ASC", (error, results) => {
+    pool.query("SELECT * FROM events WHERE edate = '" + day + "' ORDER BY edate ASC", (error, results) => {
       if (error) {
         reject(error)
       }
@@ -71,7 +71,7 @@ const getEventsByDay = (day) => {
   })
 }
 //Returns # of events
-const numEvents = ( ) => {
+const numEvents = () => {
   return new Promise(function (resolve, reject) {
     pool.query(
       'SELECT COUNT(*) FROM events', (error, results
@@ -97,31 +97,60 @@ const updateMaxSlots = (id, num) => {
   })
 }
 //Add person to event
-const addAttendee = (id, array) => {
+const addAttendee = (id, email, name) => {
   return new Promise(function (resolve, reject) {
+    console.log(id);
+    console.log(email);
     pool.query(
-      "UPDATE events SET signedUp = '"+array+"' WHERE id=\'" + id + "\';"+
-      'UPDATE events SET slots = slots + 1 WHERE id=\'' + id + "\';", (error, results
+
+      //"UPDATE events SET signedUp = '"+array+"' WHERE id=\'" + id + "\';"+
+
+      'UPDATE events SET slots = slots + 1 WHERE id=\'' + id + "\';" +
+      "INSERT INTO even (eventsID,email,name) VALUES ('" + id + "','" + email + "','" + name + "');"
+      , (error, results
       ) => {
-      if (error) {
-        reject(error)
-      }
-      resolve(results);
-    })
+        if (error) {
+          console.log(error);
+          reject(error)
+        } //console.log(results);
+        resolve(results);
+      })
   })
+
 }
-const removeAttendee = (id, array) => {
+const removeAttendee = (id, email, name) => {
   return new Promise(function (resolve, reject) {
+    console.log(id);
+    console.log(email);
     pool.query(
-      "UPDATE events SET signedUp = '"+array+"' WHERE id=\'" + id + "\';"+
-      'UPDATE events SET slots = slots - 1 WHERE id=\'' + id + "\';", (error, results
+      'UPDATE events SET slots = slots - 1 WHERE id=\'' + id + "\';" +
+      "DELETE FROM even WHERE eventsID ='" + id + "' and email ='" + email + "' and name='" + name + "';"
+      , (error, results
       ) => {
-      if (error) {
-        reject(error)
-      }
-      resolve(results.rows);
-    })
+        if (error) {
+          console.log(error);
+          reject(error)
+        }
+        resolve(results);
+      })
   })
+
+}
+const getAttendee = (id) => {
+  return new Promise(function (resolve, reject) {
+        pool.query(
+          "SELECT * FROM even WHERE eventsID ='" + id + "'"
+          , (error, results
+          ) => {
+            if (error) {
+              console.log(error);
+              reject(error)
+            }
+            //console.log(results.rows);
+            resolve(results.rows);
+          })
+
+        })
 }
 //Returns every event made
 const getOneEvent = (id) => {
@@ -138,8 +167,8 @@ const getOneEvent = (id) => {
 const addOneEvent = (id, name, description, location, edate, etime, slots, maxslots, author) => {
   return new Promise(function (resolve, reject) {
     pool.query(
-      "INSERT INTO events (id, name, description, location, edate, etime,slots,maxslots,author)VALUES('"+id+"','"+name+"','"+description+"','"+location+"','"+edate+"','"+etime+"','"+slots+"','"+maxslots+"','"+author+"');", (error, results
-        ) => {
+      "INSERT INTO events (id, name, description, location, edate, etime,slots,maxslots,author)VALUES('" + id + "','" + name + "','" + description + "','" + location + "','" + edate + "','" + etime + "','" + slots + "','" + maxslots + "','" + author + "');", (error, results
+      ) => {
       if (error) {
         reject(error)
       }
@@ -147,21 +176,21 @@ const addOneEvent = (id, name, description, location, edate, etime, slots, maxsl
       resolve("success");
     })
   })
-}  
+}
 //Edit One Event  
 const editEvent = (id, name, description, location, edate, etime, slots, maxslots) => {
   return new Promise(function (resolve, reject) {
     pool.query(
-      "UPDATE events SET id='"+id+"', name='"+name+"', description='"+description+"', location='"+location+"', edate='"+edate+"', etime='"+etime+"',slots='"+slots+"',maxslots='"+maxslots+"' WHERE id = '"+id+"';", (error, results
-        ) => {
+      "UPDATE events SET id='" + id + "', name='" + name + "', description='" + description + "', location='" + location + "', edate='" + edate + "', etime='" + etime + "',slots='" + slots + "',maxslots='" + maxslots + "' WHERE id = '" + id + "';", (error, results
+      ) => {
       if (error) {
         reject(error)
       }
       //console.log("results:",results,error)
       resolve("success");
     })
-  })     
-}     
+  })
+}
 //Removes an event
 const removeOneEvent = (id) => {
   return new Promise(function (resolve, reject) {
@@ -174,7 +203,7 @@ const removeOneEvent = (id) => {
       //console.log("results:",results,error)
       resolve("success");
     })
-  })        
+  })
 }
 
 module.exports = {
@@ -187,6 +216,7 @@ module.exports = {
   removeOneEvent,
   addAttendee,
   removeAttendee,
+  getAttendee,
   updateMaxSlots,
   searchEvents,
   getEventsByDay,
