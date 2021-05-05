@@ -127,8 +127,8 @@ app.get('/addattendee/:id/', (req, res) => {
     .catch(error => {
       res.status(500).send(error);
     })
-});
-//Signs up for Event
+}); 
+//Signs up for Event     
 app.get('/removeattendee/:id/', (req, res) => {
   const id = req.params.id;
   const array = req.body.array;
@@ -140,7 +140,7 @@ app.get('/removeattendee/:id/', (req, res) => {
     .catch(error => {
       res.status(500).send(error);
     })
-});
+}); 
 //Adds One event
 app.post('/add', (req, res) => {
   const id = req.body.id;
