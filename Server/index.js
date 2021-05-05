@@ -129,9 +129,11 @@ app.get('/addattendee/:id/:email/:name', (req, res) => {
     .catch(error => {
       res.status(500).send(error);
     })
-});
+
+}); 
 //Signs up for Event
 app.get('/removeattendee/:id/:email/:name', (req, res) => {
+
   const id = req.params.id;
   //const array = req.body.array;
   const email = req.params.email;
@@ -158,7 +160,7 @@ app.get('/getattendee/:id/', (req, res) => {
     .catch(error => {
       res.status(500).send(error);
     })
-});
+}); 
 //Adds One event
 app.post('/add', (req, res) => {
   const id = req.body.id;
