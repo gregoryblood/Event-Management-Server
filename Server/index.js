@@ -2,14 +2,9 @@
 const express = require('express'); // Express web server framework
 const pullTable = require('./pullTable.js'); //For db
 var request = require('request');
-var cookieParser = require('cookie-parser'); //For tokens
 var cors = require('cors'); //Cors headers
-const path = require('path'); //For outh
-var querystring = require('querystring'); //Tool for api querys
 var client_id = process.env.CLIENT_ID; // Your client id
-
 var client_secret = process.env.CLIENT_SECRET; // Your secret
-var redirect_uri = 'https://osu-event-server.herokuapp.com/callback'; // Your redirect uri
 const PORT = process.env.PORT || 8888; ///Finds the port the server is being ran on
 //Create Server
 const app = express();
@@ -62,7 +57,7 @@ app.get('/search/:keyword', (req, res) => {
 //Get event by startTime and endTime
 app.get('/getByTime/:start/:end', (req, res) => {
   console.log("== req.params:", req.params);
-  pullTable.getEventsByTime(req.params.start,req.params.end)
+  pullTable.getEventsByTime(req.params.start, req.params.end)
     .then(response => {
       res.status(200).send(response);
     })
@@ -70,7 +65,7 @@ app.get('/getByTime/:start/:end', (req, res) => {
       res.status(500).send(error);
     })
 }); 
-//Get event by startTime and endTime
+//Get event by startTime and endTime    
 app.get('/getByDay/:day', (req, res) => {
   console.log("== req.params:", req.params);
   pullTable.getEventsByDay(req.params.day)
@@ -147,14 +142,22 @@ app.get('/removeattendee/:id/:email/:name', (req, res) => {
       res.status(500).send(error);
     })
 });
-//Signs up for Event
+//Signs up for Event  
 app.get('/getattendee/:id/', (req, res) => {
   const id = req.params.id;
-  //const array = req.body.array;
-
   pullTable.getAttendee(id)
     .then(response => {
-      console.log(response);
+      res.status(200).send(response);
+    })
+    .catch(error => {
+      res.status(500).send(error);
+    }) 
+});  
+//Get's events based on email
+app.get('/getmyevents/:email', (req, res) => {
+  const email = req.params.email;
+  pullTable.getMyEvents(email)
+    .then(response => {
       res.status(200).send(response);
     })
     .catch(error => {
@@ -163,6 +166,7 @@ app.get('/getattendee/:id/', (req, res) => {
 }); 
 //Adds One event
 app.post('/add', (req, res) => {
+  //Could just send the object and deal with it in the function call
   const id = req.body.id;
   const name = req.body.name;
   const description = req.body.description;
@@ -180,8 +184,8 @@ app.post('/add', (req, res) => {
       res.status(500).send(error);
     })
 });
-//Edits One event
-app.post('/edit', (req, res) => {
+//Edits One event   
+app.put('/edit', (req, res) => {
   const id = req.body.id;
   const name = req.body.name;
   const description = req.body.description;
@@ -192,7 +196,7 @@ app.post('/edit', (req, res) => {
   const maxslots = req.body.maxslots;
   pullTable.editEvent(id, name, description, location, edate, etime, slots, maxslots)
     .then(response => {
-      res.status(200).send(response);
+      res.status(204).send(response);
     })  
     .catch(error => {
       res.status(500).send(error);
@@ -216,25 +220,19 @@ app.get('/remove/:id', (req, res) => {
 //-----------------------
 //This will for updating our state
 
-var generateRandomString = function (length) {
-  var text = '';
-  var possible = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-
-  for (var i = 0; i < length; i++) {
-    text += possible.charAt(Math.floor(Math.random() * possible.length));
-  }
-  return text;
-};
 
 var bearerToken = '';
  
-//Handling Logging in
+//Gets an initial token
 app.post('/login/', (req, res) => {
+  //Create headers
   var headers = {
     'accept': 'application/json',
     'Content-Type': 'application/x-www-form-urlencoded'
   };
-  var dataString = 'client_id=CXgJb9qKGN6EtcsVQasPGh24ZB9MI4U4&client_secret=oq2XYLl1Obv5z7ZQ&grant_type=client_credentials';
+  //My unsecure Strings
+  var dataString = 'client_id='+client_id+'&client_secret='+client_secret+'&grant_type=client_credentials';
+  //Options before sending for api
   var options = {
     url: 'https://api.oregonstate.edu/oauth2/token',
     method: 'POST',
@@ -253,6 +251,7 @@ app.post('/login/', (req, res) => {
   }
   request(options, callback);
 });
+//After token get status of the student
 function Next (req, res, token) {
   var email = req.body.email;
   encodeURIComponent(email)
@@ -266,111 +265,17 @@ function Next (req, res, token) {
   }; 
 
   function callback(error, response, body) {
-    if (!error && response.statusCode == 200) {
+    if (!error) {
         const obj = JSON.parse(body);
-        //console.log(obj.data[0].attributes.primaryAffiliation);
-        if (typeof obj.data[0].attributes.primaryAffiliation === 'undefined') {
-          res.status(404)
-        } 
-        res.status(200).send(obj.data[0].attributes.primaryAffiliation);
-        
-        //res.redirect('http://localhost:8888/');
+        res.status(200).send(obj);
     }
     else {
       console.error('Error: ' + response.statusCode+'\n'+body)
-      //res.redirect('http://localhost:8888/');
     }
   }
 
   request(options, callback);
 }
-//Gets the info of the user based on email
-app.get('/getinfo', function (req, res) {
-  var storedState = req.cookies ? req.cookies['BearerToken'] : null;
-
-  var headers = {
-    'accept': 'application/json',
-    'authorization': 'BearerToken ' + storedState
-  };
-
-  var options = {
-    url: 'https://api.oregonstate.edu/v2/directory?page%5Bnumber%5D=1&page%5Bsize%5D=1&filter%5BemailAddress%5D=bloodg%40oregonstate.edu',
-    headers: headers
-  };
-
-  function callback(error, response, body) {
-    if (!error && response.statusCode == 200) {
-        console.log(body);
-    }
-    else {
-      console.error('Error: '+response.statusCode)
-    }
-  }
-
-  request(options, callback);
-});
-
-//This is used for when our api goes through
-app.get('/callback', function (req, res) {
-    // your application requests refresh and access tokens
-  // after checking the state parameter
-  var code = req.query.code || null;
-  var state = req.query.state || null;
-  var storedState = req.cookies ? req.cookies[stateKey] : null;
-
-  if (state === null || state !== storedState) {
-    res.redirect('/' +
-      querystring.stringify({
-        error: 'state_mismatch'
-      }));
-  } else {
-    res.clearCookie(stateKey);
-    var authOptions = {
-      url: 'https://api.oregonstate.edu/oauth2/token',
-      form: {
-        code: code,
-        redirect_uri: redirect_uri,
-        grant_type: 'authorization_code'
-      },
-      headers: {
-        'Authorization': 'Basic ' + (new Buffer(client_id + ':' + client_secret).toString('base64'))
-      },
-      json: true
-    };
-
-    request.post(authOptions, function (error, response, body) {
-      if (!error && response.statusCode === 200) {
-
-        var access_token = body.access_token,
-          refresh_token = body.refresh_token;
-
-        var options = {
-          url: 'https://api.oregonstate.edu/v2/directory?page%5Bnumber%5D=1&page%5Bsize%5D=1&filter%5Bonid%5D=bloodg',
-          headers: { 'Authorization': 'Bearer ' + access_token },
-          json: true
-        };
-
-        // use the access token to access the Spotify Web API
-        request.get(options, function (error, response, body) {
-          console.log(body);
-        });
-
-        // we can also pass the token to the browser to make requests from there
-        res.redirect(
-          `https://osu-event-server.herokuapp.com/${querystring.stringify({
-            access_token,
-            refresh_token,
-          })}`,
-        );
-      } else {
-        res.redirect('/' +
-          querystring.stringify({
-            error: 'invalid_token'
-          }));
-      }
-    });
-  }
-});
 
 
 
