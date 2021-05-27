@@ -161,6 +161,20 @@ const getMyEvents = (email) => {
       })
     })
 }
+//Gets user's events
+const getMyOwnedEvents = (email) => {
+  return new Promise(function (resolve, reject) {
+    pool.query(
+      "SELECT * FROM events WHERE author ='" + email + "'", (error, results ) => {
+        if (error) {
+          console.log(error);
+          reject(error)
+        }
+        //console.log(results.rows);
+        resolve(results.rows);
+      })
+    })
+}
 //Returns every event made
 const getOneEvent = (id) => {
   return new Promise(function (resolve, reject) {
@@ -233,4 +247,5 @@ module.exports = {
   searchEvents,
   getEventsByDay,
   editEvent,
+  getMyOwnedEvents
 }

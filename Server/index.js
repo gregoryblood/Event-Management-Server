@@ -164,6 +164,18 @@ app.get('/getmyevents/:email', (req, res) => {
       res.status(500).send(error);
     })
 }); 
+
+//Get's events based on email
+app.get('/getmyownedevents/:email', (req, res) => {
+  const email = req.params.email;
+  pullTable.getMyOwnedEvents(email)
+    .then(response => {
+      res.status(200).send(response);
+    })
+    .catch(error => {
+      res.status(500).send(error);
+    })
+}); 
 //Adds One event
 app.post('/add', (req, res) => {
   //Could just send the object and deal with it in the function call
@@ -220,7 +232,6 @@ app.get('/remove/:id', (req, res) => {
 //-----------------------
 //This will for updating our state
 
-
 var bearerToken = '';
  
 //Gets an initial token
@@ -230,7 +241,7 @@ app.post('/login/', (req, res) => {
     'accept': 'application/json',
     'Content-Type': 'application/x-www-form-urlencoded'
   };
-  //My unsecure Strings
+  //Data for api
   var dataString = 'client_id='+client_id+'&client_secret='+client_secret+'&grant_type=client_credentials';
   //Options before sending for api
   var options = {
@@ -263,9 +274,10 @@ function Next (req, res, token) {
     url: 'https://api.oregonstate.edu/v2/directory?page%5Bnumber%5D=1&page%5Bsize%5D=1&filter%5BemailAddress%5D='+email,
     headers: headers
   }; 
-
+  //Called once request happens
   function callback(error, response, body) {
     if (!error) {
+        //Sends data back
         const obj = JSON.parse(body);
         res.status(200).send(obj);
     }
